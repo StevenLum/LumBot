@@ -1,2 +1,2 @@
 # LumBot
-A bot made for Discord.
+A bot for Discord.
