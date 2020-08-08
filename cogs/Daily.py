@@ -53,9 +53,27 @@ class Daily(commands.Cog):
             ctx.guild.id,
             user['coins']+int(amount)
         )
-        await ctx.send(f'Added {amount}{CHIPS} to {name}\'s balance.\n{name} has {user["coins"]}{CHIPS}.')
+        await ctx.send(f'Added {amount}{CHIPS} to {name}\'s balance.\n{name} has {user["coins"]+int(amount)}{CHIPS}.')
     
-    
+    @commands.command()
+    async def mod_money2(self, ctx, amount, member: discord.Member=None):
+        member = member or ctx.author
+        print(member)
+        user = await self.bot.pg_con.fetchrow(SELECT, member.id, ctx.guild.id)
+        await self.bot.pg_con.execute(
+            """
+            UPDATE users
+            SET coins = $3
+            WHERE user_id = $1 AND guild_id = $2
+            """,
+            member.id,
+            ctx.guild.id,
+            user['coins']+int(amount)
+        )
+        await ctx.send(f'Added {amount}{CHIPS} to {member.name}\'s balance.\n{member.name} has {user["coins"]+int(amount)}{CHIPS}.')
+
+
+
     async def get_user_id(self, ctx, name, disc):
         for member in ctx.guild.members:
             if member.name == name and member.discriminator == disc:

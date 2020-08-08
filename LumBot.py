@@ -25,6 +25,7 @@ except ValueError:
 #client = commands.Bot(command_prefix = COMMAND_PREFIX)
 
 INITIAL_EXTENSIONS = [
+    "cogs.Hello",
     "cogs.8ball",
     "cogs.Farkle",
     "cogs.Talk",
@@ -126,12 +127,6 @@ async def unload(ctx, *args):
             await ctx.send(f'{extension} not found.')
         except commands.ExtensionNotLoaded:
             await ctx.send(f'{extension} is not loaded.')
-
-@client.command(hidden=True)
-@commands.is_owner()
-async def unload2(ctx, *args):
-    client.unload_extension(f'cogs.{extension}')
-
     
 @client.command(hidden=True)
 @commands.is_owner()
@@ -140,11 +135,12 @@ async def reload(ctx, *args):
         try:
             client.reload_extension(f'cogs.{extension}')
             print(f'Reloaded {extension}.')
+        except commands.ExtensionNotFound:
+            await ctx.send(f'{extension} not found.')
         except commands.ExtensionNotLoaded:
             client.load_extension(f'cogs.{extension}')
             print(f'Loaded {extension}.')
-        except commands.ExtensionNotFound:
-            await ctx.send(f'{extension} not found.')
+        
 
 
 
