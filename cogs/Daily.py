@@ -11,15 +11,16 @@ class Daily(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.DAILY_INTERVAL = 12*60*60
+        self.DAILY_REWARD = 50
         self.time = Time()
 
     @commands.command() 
     async def daily(self, ctx):
         user = await self.bot.pg_con.fetchrow(SELECT, ctx.author.id, ctx.guild.id)
         dif = self.time.subtract(user["daily"])
-
+        
         if dif.total_seconds() >= self.DAILY_INTERVAL:
-            daily = f"You got 50 {CHIPS}! Come back again in 12 hours."
+            daily = f'You got 50 {CHIPS}! Come back again in 12 hours.\nYou have {user["coins"]+self.DAILY_REWARD}{CHIPS}'
             await self.bot.pg_con.execute(
                 """
                 UPDATE users
@@ -29,7 +30,7 @@ class Daily(commands.Cog):
                 ctx.author.id,
                 ctx.guild.id,
                 self.time.get_datetime(),
-                user['coins']+50
+                user['coins']+self.DAILY_REWARD
             )
         else:
             daily = self.time.delta(dif)
@@ -55,7 +56,8 @@ class Daily(commands.Cog):
         )
         await ctx.send(f'Added {amount}{CHIPS} to {name}\'s balance.\n{name} has {user["coins"]+int(amount)}{CHIPS}.')
     
-    @commands.command()
+    @commands.command(hidden=True)
+    @commands.is_owner()
     async def mod_money2(self, ctx, amount, member: discord.Member=None):
         member = member or ctx.author
         print(member)

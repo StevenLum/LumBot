@@ -7,7 +7,7 @@ class DBStats(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def get_stats(self, ctx):
+    async def profile(self, ctx):
         user = await self.bot.pg_con.fetchrow(SELECT, ctx.author.id, ctx.guild.id)
         await ctx.send(f'```Level: {user["level"]}\nExp: {user["exp"]}\nBalance: {user["coins"]}```')
 

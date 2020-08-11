@@ -31,7 +31,9 @@ INITIAL_EXTENSIONS = [
     "cogs.Talk",
     "cogs.Admin",
     "cogs.Daily",
-    "cogs.DBStats"
+    "cogs.DBStats",
+    "cogs.Roll",
+    "cogs.Music"
 ]
 
 
@@ -54,6 +56,8 @@ class LumBot(commands.Bot):
             if filename.endswith('.py'):
                 self.load_extension(f'cogs.{filename[:-3]}')
         '''
+
+
 
     async def on_ready(self):
         print('Bot is ready.')
@@ -93,12 +97,16 @@ async def on_member_remove(member):
 
 client = LumBot()
 
+'''
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send('Command doesnt exist. Type ".help" for commands.')
+    elif isinstance(error, commands.NotOwner):
+        await ctx.send('You do not own this bot.\nSit down.')
     else:
         raise error
+'''
 
 @client.command(hidden=True)
 async def clear(ctx, amount=1):
@@ -180,6 +188,8 @@ async def shutdown(ctx):
 async def restart(ctx):
     await client.close()
     os.startfile("D:\Desktop\Bot\LumBot.bat")
+
+
 
 @client.command()
 async def ping(ctx):
