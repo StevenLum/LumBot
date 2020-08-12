@@ -6,7 +6,7 @@ from settings import load_bot_token, load_db_password, load_db_host, load_db_por
 import asyncpg
 
 COMMAND_PREFIX = '.'
-DESCRIPTION = 'A Bot for discord.'
+DESCRIPTION = 'A Bot for discord.\nUse "' + COMMAND_PREFIX + '" before any of the commands below'
 
 CHIPS = "\U0001F4B0"
 TICKETS = "\U0001F3AB"

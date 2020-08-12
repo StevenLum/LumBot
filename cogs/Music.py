@@ -3,6 +3,7 @@ from discord.ext import commands
 import youtube_dl
 import nacl
 import asyncio
+from discord.utils import get
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -30,7 +31,7 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 
 class YTDLSource(discord.PCMVolumeTransformer):
-    def __init__(self, source, *, data, volume=0.5):
+    def __init__(self, source, *, data, volume=0.3):
         super().__init__(source, volume)
 
         self.data = data
@@ -75,8 +76,8 @@ class Music(commands.Cog):
                 del self.voice_client[channel]
                 await vc.disconnect()
 
-    @commands.command()
-    async def yt(self, ctx, *, url):
+    @commands.command(hidden=True)
+    async def yt2(self, ctx, *, url):
         if ctx.author.voice:
             try:
                 self.voice_client[ctx.author.voice.channel]
@@ -88,30 +89,75 @@ class Music(commands.Cog):
             ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
         await ctx.send('Now playing: {}'.format(player.title))
 
+    def play_next(self, ctx):
+        channel = ctx.author.voice.channel
+        self.voice_client[channel]
+        if self.queues[ctx.guild] != []:
+            player = self.queues[ctx.guild].pop(0)
+            ctx.voice_client.play(player, after=lambda e: self.play_next(ctx))
+
+            
     @commands.command()
+    async def yt(self, ctx, *, url):
+        channel = ctx.author.voice.channel
+        player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+
+        if ctx.author.voice:
+            try:
+                self.voice_client[channel]
+            except:
+                await self.join(ctx)
+        if not self.voice_client[channel].is_playing():
+            self.queues[ctx.guild] = [player]
+            ctx.voice_client.play(player, after=lambda e: self.play_next(ctx))
+        else:
+            self.queues[ctx.guild].append(player)
+    
+
+
+    @commands.command(breif='[number]')
     async def volume(self, ctx, volume: int):
         if ctx.voice_client is None:
             return await ctx.send('Not connected to a voice channel.')
         ctx.voice_client.source.volume = volume / 100
 
-    @commands.command()
+    @commands.command(help='pauses the song')
     async def pause(self, ctx):
-        ctx.voice_client.pause()
+        voice = get(self.bot.voice_clients, guild=ctx.guild)
+        if voice.is_connected():
+            if voice.is_playing(): voice.pause()
+            else: voice.resume()
 
-    @commands.command()
-    async def play(self, ctx):
-        ctx.voice_client.resume()
-
-    @commands.command()
+    @commands.command(help='leaves the VC and drops the playlist')
     async def stop(self, ctx):
         ctx.voice_client.stop()
+        self.queues[ctx.guild] = []
         await self.leave(ctx)
 
-    @commands.command()
+    @commands.command(help='skips to the next song in the playlist')
+    async def skip(self, ctx):
+        if ctx.voice_client.is_playing():
+            ctx.voice_client.pause()
+        self.play_next(ctx)
+
+    @commands.command(help='show the playlist')
+    async def playlist(self, ctx):
+        c=1
+        playlist = []
+        if self.queues[ctx.guild] != []:
+            for song in self.queues[ctx.guild]:
+                playlist.append(f'{c}. {song.title}')
+                c+=1
+            await ctx.send(" \n".join(map(str, playlist)))
+        else: await ctx.send("Playlist is empty")
+    
+    @commands.command(help='removes the song in the playlist')
+    async def remove(self, ctx, *, number: int):
+        del self.queues[ctx.guild][number]
+    
+    @commands.command(hidden=True)
     async def show(self, ctx):
-        await ctx.send(f'{self.voice_client}\n{self.players}')
-    
-    
+        await ctx.send(self.queues[ctx.guild])
     '''
     @commands.command()
     async def queue(self, ctx, url):
