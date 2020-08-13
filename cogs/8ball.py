@@ -7,7 +7,7 @@ class Fortune(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
-    @commands.command(aliases=['eightball'], name='8ball', help='eightball also works')
+    @commands.command(aliases=['eightball'], name='8ball|eightball', help='magic 8 ball')
     async def _8ball(self, ctx, *, question):
         responses = ["It is certain.",
                     "It is decidedly so.",

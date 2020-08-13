@@ -6,17 +6,17 @@ class DBStats(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(help='idk what to do with this yet')
     async def profile(self, ctx):
         user = await self.bot.pg_con.fetchrow(SELECT, ctx.author.id, ctx.guild.id)
         await ctx.send(f'```Level: {user["level"]}\nExp: {user["exp"]}\nBalance: {user["coins"]}```')
 
-    @commands.command(aliases=['balance'])
+    @commands.command(aliases=['balance'], help='shows balance')
     async def bal(self, ctx):
         user = await self.bot.pg_con.fetchrow(SELECT, ctx.author.id, ctx.guild.id)
         await ctx.send(f'```Balance: {user["coins"]}```')
 
-    @commands.command()
+    @commands.command(help='shows profile picture')
     @commands.guild_only()
     async def avatar(self, ctx, member: discord.Member=None):
         member = member or ctx.author

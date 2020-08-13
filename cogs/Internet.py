@@ -11,7 +11,7 @@ class Internet(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(help='random meme')
     async def meme(self, ctx):
         #r = requests.get("https://meme-api.herokuapp.com/gimme")
         data = urllib.request.urlopen("https://meme-api.herokuapp.com/gimme").read()
@@ -23,7 +23,7 @@ class Internet(commands.Cog):
                 #.add_field(description=data['postLink']))
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(help='shows weather')
     async def weather(self, ctx, city='Auckland'):
         data = urllib.request.urlopen(f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&APPID=fb9df86d9c484eba8a69269cfb0beac9").read()
         data = data.decode('utf-8')

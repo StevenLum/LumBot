@@ -27,16 +27,6 @@ class Farkle(commands.Cog):
     #    for emoji in ctx.guild.emojis:
     #        print(emoji)
 
-    @commands.command()
-    async def em(self, ctx):
-        
-        #for emoji in ctx.guild.emojis:
-        #    print(emoji)
-
-        for guild in self.client.guilds:
-            for emoji in guild.emojis:
-                print(emoji)
-                
 
 
     

@@ -14,7 +14,7 @@ class Daily(commands.Cog):
         self.DAILY_REWARD = 50
         self.time = Time()
 
-    @commands.command() 
+    @commands.command(help='gives 50 coins') 
     async def daily(self, ctx):
         user = await self.bot.pg_con.fetchrow(SELECT, ctx.author.id, ctx.guild.id)
         dif = self.time.subtract(user["daily"])

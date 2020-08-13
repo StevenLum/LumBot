@@ -33,7 +33,8 @@ INITIAL_EXTENSIONS = [
     "cogs.Daily",
     "cogs.DBStats",
     "cogs.Roll",
-    "cogs.Music"
+    "cogs.Music",
+    "cogs.Internet"
 ]
 
 

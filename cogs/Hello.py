@@ -5,7 +5,7 @@ class Hello(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(help='makes you feel less lonely')
     async def hello(self, ctx):
         await ctx.send(f'Hello {ctx.author.name}!')
 

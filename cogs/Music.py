@@ -24,7 +24,8 @@ ytdl_format_options = {
 }
 
 ffmpeg_options = {
-    'options': '-vn'
+    'options': '-vn',
+    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
 }
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
@@ -61,21 +62,19 @@ class Music(commands.Cog):
         self.players = {}
         self.queues = {}
     
-    @commands.command()
+    @commands.command(help='joins the channel that you\'re in')
     async def join(self, ctx):
         channel = ctx.author.voice.channel
         self.voice_client[channel] = await channel.connect()
     
-    @commands.command()
+    @commands.command(help='leaves voice channel')
     async def leave(self, ctx):
-        channel = ctx.author.voice.channel
-        #await self.voice_client[channel].disconnect()
-        #del self.voice_client[channel]
-        #await ctx.send(self.bot.voice_clients)
-        for vc in self.bot.voice_clients:
+        #channel = ctx.author.voice.channel #VoiceChannel
+        for vc in self.bot.voice_clients: #VoiceClient
             if vc.guild == ctx.message.guild:
-                del self.voice_client[channel]
+                del self.voice_client[vc.channel]
                 await vc.disconnect()
+                return
 
     @commands.command(hidden=True)
     async def yt2(self, ctx, *, url):
@@ -98,7 +97,7 @@ class Music(commands.Cog):
             ctx.voice_client.play(player, after=lambda e: self.play_next(ctx))
 
             
-    @commands.command()
+    @commands.command(help='give a url or name')
     async def yt(self, ctx, *, url):
         channel = ctx.author.voice.channel
         player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
@@ -119,7 +118,7 @@ class Music(commands.Cog):
     
 
 
-    @commands.command(breif='[number]')
+    @commands.command(breif='[number]', help='changes volume default is 30')
     async def volume(self, ctx, volume: int):
         if ctx.voice_client is None:
             return await ctx.send('Not connected to a voice channel.')
@@ -144,7 +143,7 @@ class Music(commands.Cog):
             ctx.voice_client.pause()
         self.play_next(ctx)
 
-    @commands.command(help='show the playlist', aliases=['pl'])
+    @commands.command(help='shows the playlist', aliases=['pl'])
     async def playlist(self, ctx):
         vc = ctx.voice_client
         await ctx.send(f'Now playing: {vc.source.title}')
@@ -164,7 +163,7 @@ class Music(commands.Cog):
     
     @commands.command(hidden=True)
     async def show(self, ctx):
-        await ctx.send(self.queues[ctx.guild])
+        await ctx.send(self.bot.voice_clients)
     '''
     @commands.command()
     async def queue(self, ctx, url):
