@@ -38,6 +38,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         self.title = data.get('title')
         self.url = data.get('url')
+        self.all = data
 
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
@@ -107,11 +108,14 @@ class Music(commands.Cog):
                 self.voice_client[channel]
             except:
                 await self.join(ctx)
-        if not self.voice_client[channel].is_playing():
-            self.queues[ctx.guild] = [player]
-            ctx.voice_client.play(player, after=lambda e: self.play_next(ctx))
-        else:
+
+        try:
             self.queues[ctx.guild].append(player)
+        except:
+            self.queues[ctx.guild] = []
+            ctx.voice_client.play(player, after=lambda e: self.play_next(ctx))
+
+
     
 
 
@@ -121,7 +125,7 @@ class Music(commands.Cog):
             return await ctx.send('Not connected to a voice channel.')
         ctx.voice_client.source.volume = volume / 100
 
-    @commands.command(help='pauses the song')
+    @commands.command(help='pauses/plays the song')
     async def pause(self, ctx):
         voice = get(self.bot.voice_clients, guild=ctx.guild)
         if voice.is_connected():
@@ -140,8 +144,10 @@ class Music(commands.Cog):
             ctx.voice_client.pause()
         self.play_next(ctx)
 
-    @commands.command(help='show the playlist')
+    @commands.command(help='show the playlist', aliases=['pl'])
     async def playlist(self, ctx):
+        vc = ctx.voice_client
+        await ctx.send(f'Now playing: {vc.source.title}')
         c=1
         playlist = []
         if self.queues[ctx.guild] != []:
@@ -150,6 +156,7 @@ class Music(commands.Cog):
                 c+=1
             await ctx.send(" \n".join(map(str, playlist)))
         else: await ctx.send("Playlist is empty")
+
     
     @commands.command(help='removes the song in the playlist')
     async def remove(self, ctx, *, number: int):
