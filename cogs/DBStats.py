@@ -1,16 +1,29 @@
 import discord
 from discord.ext import commands
 from modules.postgresql import SELECT
+from datetime import datetime
 
 class DBStats(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command(help='idk what to do with this yet')
-    async def profile(self, ctx):
+    async def gameprofile(self, ctx):
         user = await self.bot.pg_con.fetchrow(SELECT, ctx.author.id, ctx.guild.id)
         await ctx.send(f'```Level: {user["level"]}\nExp: {user["exp"]}\nBalance: {user["coins"]}```')
 
+    @commands.command(help='IDENTIFICATION PLEASE')
+    async def profile(self, ctx, member: discord.Member=None):
+        member = member or ctx.author
+        embed = (discord.Embed(title=f'Information about {member}')
+                .set_thumbnail(url=f'{member.avatar_url}')
+                .add_field(name='Username:', value=f'{member.name}')
+                .add_field(name='ID:', value=f'{member.id}')
+                .add_field(name='Nickname:', value=f'{member.nick}')
+                .add_field(name='Join Date:', value=f'{member.joined_at.strftime("%A %d %B %Y")}')
+                .add_field(name='Creation Date:', value=f'{member.created_at.strftime("%A %d %B %Y")}')
+                )
+        await ctx.send(embed=embed)
     @commands.command(aliases=['balance'], help='shows balance')
     async def bal(self, ctx):
         user = await self.bot.pg_con.fetchrow(SELECT, ctx.author.id, ctx.guild.id)
