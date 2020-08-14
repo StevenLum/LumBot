@@ -27,7 +27,9 @@ except ValueError:
 INITIAL_EXTENSIONS = [
     "cogs.Hello",
     "cogs.8ball",
-    "cogs.Farkle",
+    #"cogs.Farkle",
+    "cogs.Events",
+    "cogs.Emote",
     "cogs.Talk",
     "cogs.Admin",
     "cogs.Daily",

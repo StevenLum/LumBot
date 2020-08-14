@@ -25,6 +25,7 @@ class Internet(commands.Cog):
 
     @commands.command(help='shows weather')
     async def weather(self, ctx, city='Auckland'):
+        city=city.title()
         data = urllib.request.urlopen(f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&APPID=fb9df86d9c484eba8a69269cfb0beac9").read()
         data = data.decode('utf-8')
         data = json.loads(data)

@@ -8,7 +8,16 @@ class Emote(commands.Cog):
         self.emojinames = [emoji.name for emoji in self.emojis]
     @commands.command(help='shows every emote this bot knows')
     async def nitrolist(self, ctx):  
-        await ctx.send(" ".join(map(str, self.emojis)))
+        #await ctx.send(" ".join(map(str, self.emojis)))
+        send_list = []
+        for i in range(len(self.emojis)):
+            if i % 16 == 0 and i != 0:
+                await ctx.send("".join(map(str, send_list)))
+                send_list = []
+            send_list += [self.emojis[i]]
+        await ctx.send("".join(map(str, send_list)))
+
+
         '''
         self.emojii = []
         for guild in self.bot.guilds:
