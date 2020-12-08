@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from modules.postgresql import DEFAULT_VALUES, SELECT
+from modules.postgresql import DEFAULT_VALUES, SELECT, UPDATE_BACKGROUND
 
 
 class Admin(commands.Cog):
@@ -17,6 +17,7 @@ class Admin(commands.Cog):
 
         for guild in self.bot.guilds:
             for member in guild.members:
+                # print(member.id)
                 if not (member == self.bot.user or member.bot):
                     user = await self.bot.pg_con.fetchrow(SELECT, member.id, guild.id)
 
@@ -25,11 +26,22 @@ class Admin(commands.Cog):
                             DEFAULT_VALUES, member.id, guild.id
                         )
                         users += 1
+                user = await self.bot.pg_con.execute(UPDATE_BACKGROUND, member.id, guild.id, str(member.avatar_url))
 
         print(f"\n...DB update completed\n{users} users were added to DB")
         await ctx.channel.send(
             f"...DB update completed\n{users} users were added to DB"
         )
+
+    @commands.command()
+    async def guildMembers(self, ctx):
+        members = []
+        for guild in self.bot.guilds:
+            if guild.id == ctx.guild.id:
+                for member in guild.members:
+                    members.append(member)
+                    # print(str(member))
+        await ctx.send(members)
 
     @commands.command(hidden=True)
     @commands.is_owner()

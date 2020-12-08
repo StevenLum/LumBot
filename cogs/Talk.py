@@ -1,10 +1,14 @@
 import discord
 from discord.ext import commands
-import threading
+from multiprocessing import Process
 import queue
+from discord.utils import get
+from cogs.Emote import Emote
+# I dont know how to do threads.
+
 
 class Talk(commands.Cog):
-    
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -18,26 +22,56 @@ class Talk(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.is_owner()
-    async def talk(self, ctx):
-        inputQueue = queue.Queue()
-        EXIT_COMMAND = 'exit'
-        def read_kbd_input(inputQueue):
-            print('Ready for input: ')
-            while True:
-                input_str = input()
-                inputQueue.put(input_str)
-        inputThread = threading.Thread(target=read_kbd_input, args=(inputQueue), daemon=True)
-        inputThread.start()
+    async def talk(self, ctx, guildID, channelName):
+
+        def findChannel(guildID, channelName):
+            for guild in self.bot.guilds:
+                if guild.id == int(guildID):
+                    for channel in guild.text_channels:
+                        if str(channel) == channelName:
+                            return (guild, channel)
+            return (-1, -1)
+
+        channel = findChannel(guildID, channelName)
+        if -1 in channel:
+            await ctx.send("Can't find channel")
+            return
+        await ctx.send(f"Talking in {channel[0].name}: {channel[1]}")
+
         while True:
-            if (inputQueue.qsize() > 0):
-                input_str = inputQueue.get()
-                if input_str == EXIT_COMMAND:
-                    break
-                await ctx.send(input_str)
+            inp = await input()
+            if inp == '.exit' or inp == '.e' or inp == '.quit' or inp == '.q':
+                break
+            if inp.split()[0] == '.nitro':
+                inp = inp[6:]
+                inp = Emote.emote(ctx, inp)
+                if inp == '':
+                    continue
+            await channel[1].send(inp)
 
-        
+    @ commands.command()
+    async def mock(self, ctx, member: discord.Member = None):
 
-    
+        def check(m):
+            return m.author == member
+
+        member = member or ctx.author
+        await self.bot.wait_for("message", check=check)
+        # if ctx.message.author == member:
+        await ctx.send(ctx.message.content)
+        # print(ctx.message.author, member)
+
+    @ commands.command(hidden=True)
+    @ commands.is_owner()
+    async def getServers(self, ctx):
+        guilds = [guild for guild in self.bot.guilds]
+        text_channels = []
+        for guild in guilds:
+            await ctx.send(str(guild.id) + ' ' + guild.name + '\n')
+            text_channels = []
+            for i in range(len(guild.text_channels)):
+                text_channels.append(guild.text_channels[i].name)
+            await ctx.send(text_channels)
 
 
 def setup(bot):
