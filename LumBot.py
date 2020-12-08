@@ -6,7 +6,8 @@ from settings import load_bot_token, load_db_password, load_db_host, load_db_por
 import asyncpg
 
 COMMAND_PREFIX = '.'
-DESCRIPTION = 'A Bot for discord.\nUse "' + COMMAND_PREFIX + '" before any of the commands below'
+DESCRIPTION = 'A Bot for discord.\nUse "' + \
+    COMMAND_PREFIX + '" before any of the commands below'
 
 CHIPS = "\U0001F4B0"
 TICKETS = "\U0001F3AB"
@@ -27,7 +28,7 @@ except ValueError:
 INITIAL_EXTENSIONS = [
     "cogs.Hello",
     "cogs.8ball",
-    #"cogs.Farkle",
+    # "cogs.Farkle",
     "cogs.Events",
     "cogs.Emote",
     "cogs.Talk",
@@ -36,7 +37,8 @@ INITIAL_EXTENSIONS = [
     "cogs.DBStats",
     "cogs.Roll",
     "cogs.Music",
-    "cogs.Internet"
+    "cogs.Internet",
+    "cogs.Slots"
 ]
 
 
@@ -47,7 +49,8 @@ class LumBot(commands.Bot):
             description=DESCRIPTION,
             pm_help=None,
             fetch_offline_members=False,
-            heartbeat_timeout=150.0
+            heartbeat_timeout=150.0,
+            intents=intents
         )
 
         self.token = load_bot_token()
@@ -60,12 +63,11 @@ class LumBot(commands.Bot):
                 self.load_extension(f'cogs.{filename[:-3]}')
         '''
 
-
-
     async def on_ready(self):
         print('Bot is ready.')
         await self.change_presence(
-            activity=discord.Activity(type=discord.ActivityType.listening, name='.help')   
+            activity=discord.Activity(
+                type=discord.ActivityType.watching, name='.help')
         )
 
     async def create_db_pool(self):
@@ -77,12 +79,10 @@ class LumBot(commands.Bot):
             password=load_db_password(),
         )
 
-    
-
     def run(self):
         super().run(self.token)
 
-    
+
 '''
 @client.event
 async def on_command_error(ctx, error):
@@ -97,7 +97,7 @@ async def on_member_join(member):
 async def on_member_remove(member):
     print(f'{member} has left the server.')
 '''
-
+intents = discord.Intents().all()
 client = LumBot()
 
 '''
@@ -111,9 +111,11 @@ async def on_command_error(ctx, error):
         raise error
 '''
 
+
 @client.command(hidden=True)
 async def clear(ctx, amount=1):
     await ctx.channel.purge(limit=amount)
+
 
 @client.command(hidden=True)
 @commands.is_owner()
@@ -127,6 +129,7 @@ async def load(ctx, *args):
         except commands.ExtensionNotFound:
             await ctx.send(f'{extension} not found.')
 
+
 @client.command(hidden=True)
 @commands.is_owner()
 async def unload(ctx, *args):
@@ -138,7 +141,8 @@ async def unload(ctx, *args):
             await ctx.send(f'{extension} not found.')
         except commands.ExtensionNotLoaded:
             await ctx.send(f'{extension} is not loaded.')
-    
+
+
 @client.command(hidden=True)
 @commands.is_owner()
 async def reload(ctx, *args):
@@ -151,8 +155,6 @@ async def reload(ctx, *args):
         except commands.ExtensionNotLoaded:
             client.load_extension(f'cogs.{extension}')
             print(f'Loaded {extension}.')
-        
-
 
 
 @client.command(hidden=True)
@@ -161,30 +163,32 @@ async def find_loaded(ctx):
     loaded = []
     not_loaded = []
     for filename in os.listdir('./cogs'):
-            if filename.endswith('.py'):
-                try:
-                    client.load_extension(f'cogs.{filename[:-3]}')
-                    client.unload_extension(f'cogs.{filename[:-3]}')
-                    not_loaded += [str(filename)]
-                    #await ctx.send(f'{filename} not loaded')
-                except commands.ExtensionAlreadyLoaded:
-                    #await ctx.send(f'{filename} is loaded.')
-                    loaded += [str(filename)]
-                #except:
-                    #await ctx.send(f'{filename}')
-                    #await ctx.send('Extension not found.')
+        if filename.endswith('.py'):
+            try:
+                client.load_extension(f'cogs.{filename[:-3]}')
+                client.unload_extension(f'cogs.{filename[:-3]}')
+                not_loaded += [str(filename)]
+                # await ctx.send(f'{filename} not loaded')
+            except commands.ExtensionAlreadyLoaded:
+                # await ctx.send(f'{filename} is loaded.')
+                loaded += [str(filename)]
+            # except:
+                # await ctx.send(f'{filename}')
+                # await ctx.send('Extension not found.')
     for ext in loaded:
         await ctx.send(f'{ext} is loaded.')
     for ext in not_loaded:
         await ctx.send(f'{ext} is not loaded')
-    #await ctx.send(f'{loaded}\n {not_loaded}')
+    # await ctx.send(f'{loaded}\n {not_loaded}')
     await ctx.send("No more extensions found.")
+
 
 @client.command(aliases=['quit', 'close', 'q'], hidden=True)
 @commands.is_owner()
 async def shutdown(ctx):
     await client.close()
     print('Bot closed.')
+
 
 @client.command(hidden=True)
 @commands.is_owner()
@@ -193,11 +197,9 @@ async def restart(ctx):
     os.startfile("D:\Desktop\Bot\LumBot.bat")
 
 
-
 @client.command()
 async def ping(ctx):
     await ctx.send(f'Pong! {round(client.latency * 1000)}ms')
 
 client.loop.run_until_complete(client.create_db_pool())
 client.run()
-

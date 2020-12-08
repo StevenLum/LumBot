@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-class Events(commands.Cog):
+class Events(commands.Cog): #THIS DOESNT EVEN WORK >:(
     def __init__(self, bot):
         self.bot = bot
 

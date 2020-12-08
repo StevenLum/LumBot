@@ -22,3 +22,9 @@ TICKETS_COINS = """
     SET tickets = $3
     WHERE user_id = $1 AND guild_id = $2
 """
+
+UPDATE_BACKGROUND = """
+    UPDATE users
+    SET background = $3
+    WHERE user_id = $1 AND guild_id = $2
+"""
